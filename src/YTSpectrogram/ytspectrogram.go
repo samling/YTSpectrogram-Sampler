@@ -1,9 +1,11 @@
 package main
 
+import "github.com/kennygrant/sanitize"
 import "github.com/mdlayher/waveform"
 import "encoding/json"
 import "fmt"
 import "io"
+import "io/ioutil"
 import "math"
 import "os"
 
@@ -35,8 +37,11 @@ func Round(val float64, roundOn float64, places int) (newVal float64) {
 }
 
 func main() {
+	// Protect against path traversal via injection
+	filename := sanitize.BaseName(os.Args[1])
+
 	// Open an IO Reader for our FLAC file
-	r, err := os.Open("./audio/test.flac")
+	r, err := os.Open("./audio/" + filename + ".flac")
 	if err != nil {
 		panic(err)
 	}
@@ -71,8 +76,17 @@ func main() {
 		m[t] = adjusted
 	}
 
+	// TODO: Average our values to smooth out any blips and outliers
+	// TODO: Identify them first?
+
 	// Serialize our map as a JSON dict
 	jsonKeys, _ := json.Marshal(m)
+
+	// Write the results to a json file
+	err = ioutil.WriteFile("./out.json", jsonKeys, 0644)
+	if err != nil {
+		panic(err)
+	}
 
 	// Print the map
 	fmt.Println(string(jsonKeys))
