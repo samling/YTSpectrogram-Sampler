@@ -92,14 +92,15 @@ func main() {
 	// Serialize our map as a JSON dict
 	jsonData, _ := json.Marshal(m)
 
-	// Connect to our database and write to it
+	// Connect to our database
 	connString := GetConnectionString(os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
 	db := sqlx.MustConnect("mysql", connString)
 
+	// Write hash and sampledata to db, ignore duplicates
 	tx := db.MustBegin()
 	tx.MustExec("INSERT INTO samples (hash, sampledata) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=hash", hash, jsonData)
 	tx.Commit()
 
 	// Print the map
-	fmt.Println(string(jsonData))
+	//fmt.Println(string(jsonData))
 }
