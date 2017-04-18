@@ -8,3 +8,4 @@ pkg/*
 !bin/.gitkeep
 !src/.gitkeep
 !pkg/.gitkeep
+!src/YTSpectrogram/
