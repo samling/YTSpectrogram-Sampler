@@ -1,7 +1,7 @@
 .DS_Store
 **/*.swp
 YTSpectrogram
-out.json
+*.json
 bin/*
 src/*
 pkg/*
@@ -9,3 +9,6 @@ pkg/*
 !src/.gitkeep
 !pkg/.gitkeep
 !src/YTSpectrogram/
+env.sh
+audio/*
+!audio/.gitkeep

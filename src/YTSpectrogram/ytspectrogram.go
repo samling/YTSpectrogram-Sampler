@@ -1,13 +1,18 @@
 package main
 
-import "github.com/kennygrant/sanitize"
-import "github.com/mdlayher/waveform"
-import "encoding/json"
-import "fmt"
-import "io"
-import "io/ioutil"
-import "math"
-import "os"
+import (
+	_ "database/sql"
+	"encoding/json"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
+	"github.com/kennygrant/sanitize"
+	"github.com/mdlayher/waveform"
+	"io"
+	"io/ioutil"
+	"math"
+	"os"
+)
 
 // Piggybacking off the waveform library to retrieve just the sample values instead of an image
 func GetSampleValues(r io.Reader, options ...waveform.OptionsFunc) ([]float64, error) {
@@ -34,6 +39,10 @@ func Round(val float64, roundOn float64, places int) (newVal float64) {
 	}
 	newVal = round / pow
 	return
+}
+
+func ConnectionString(dbHost string, dbUser string, dbPass string, dbName string) string {
+	return fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", dbUser, dbPass, dbHost, dbName)
 }
 
 func main() {
@@ -82,8 +91,12 @@ func main() {
 	// Serialize our map as a JSON dict
 	jsonKeys, _ := json.Marshal(m)
 
+	connString := ConnectionString(os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
+	db := sqlx.MustConnect("mysql", connString)
+	err = db.Ping()
+
 	// Write the results to a json file
-	err = ioutil.WriteFile("./out.json", jsonKeys, 0644)
+	err = ioutil.WriteFile("./"+filename+".json", jsonKeys, 0644)
 	if err != nil {
 		panic(err)
 	}
