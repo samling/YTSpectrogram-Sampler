@@ -6,10 +6,9 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/kennygrant/sanitize"
+	_ "github.com/kennygrant/sanitize"
 	"github.com/mdlayher/waveform"
 	"io"
-	"io/ioutil"
 	"math"
 	"os"
 )
@@ -41,16 +40,18 @@ func Round(val float64, roundOn float64, places int) (newVal float64) {
 	return
 }
 
-func ConnectionString(dbHost string, dbUser string, dbPass string, dbName string) string {
+func GetConnectionString(dbHost string, dbUser string, dbPass string, dbName string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", dbUser, dbPass, dbHost, dbName)
 }
 
 func main() {
 	// Protect against path traversal via injection
-	filename := sanitize.BaseName(os.Args[1])
+	// TODO: Resolve conflicts with URLs that have "_" in them
+	//hash := sanitize.Path(os.Args[1])
+	hash := os.Args[1]
 
 	// Open an IO Reader for our FLAC file
-	r, err := os.Open("./audio/" + filename + ".flac")
+	r, err := os.Open("./audio/" + hash + ".flac")
 	if err != nil {
 		panic(err)
 	}
@@ -89,18 +90,16 @@ func main() {
 	// TODO: Identify them first?
 
 	// Serialize our map as a JSON dict
-	jsonKeys, _ := json.Marshal(m)
+	jsonData, _ := json.Marshal(m)
 
-	connString := ConnectionString(os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
+	// Connect to our database and write to it
+	connString := GetConnectionString(os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
 	db := sqlx.MustConnect("mysql", connString)
-	err = db.Ping()
 
-	// Write the results to a json file
-	err = ioutil.WriteFile("./"+filename+".json", jsonKeys, 0644)
-	if err != nil {
-		panic(err)
-	}
+	tx := db.MustBegin()
+	tx.MustExec("INSERT INTO samples (hash, sampledata) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=hash", hash, jsonData)
+	tx.Commit()
 
 	// Print the map
-	fmt.Println(string(jsonKeys))
+	fmt.Println(string(jsonData))
 }
