@@ -2,10 +2,25 @@ package main
 
 import "github.com/mdlayher/waveform"
 import "encoding/json"
+import "fmt"
 import "io"
 import "math"
 import "os"
-import "fmt"
+import "sort"
+
+type jsonobject struct {
+	Object ObjectType
+}
+
+type ObjectType struct {
+	Resolution int
+	Samples    []Sample
+}
+
+type Sample struct {
+	Second int
+	Value  float64
+}
 
 func GetSampleValues(r io.Reader, options ...waveform.OptionsFunc) ([]float64, error) {
 	w, err := waveform.New(r, options...)
@@ -41,6 +56,9 @@ func main() {
 
 	max := 0
 	resolution := uint(4)
+	m := make(map[int]interface{})
+
+	var keys []int
 
 	values, err := GetSampleValues(r,
 		nil,
@@ -58,9 +76,17 @@ func main() {
 	for t, f := range values {
 		adjusted := Round((f*1E6), .5, 0) / float64(max)
 		//fmt.Printf("%d,%.2f,%d\n", t, adjusted, int(resolution))
-		sampleSlice := []float64{float64(t), adjusted}
-		sampleJson, _ := json.Marshal(sampleSlice)
+		//sampleSlice := []float64{float64(t), adjusted}
+		//sampleJson, _ := json.Marshal(sampleSlice)
+		m[t] = adjusted
 
-		fmt.Println(string(sampleJson))
 	}
+
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+
+	jsonKeys, _ := json.Marshal(keys)
+	fmt.Println(string(jsonKeys))
 }
