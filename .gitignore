@@ -2,3 +2,9 @@
 **/*.swp
 YTSpectrogram
 out.json
+bin/*
+src/*
+pkg/*
+!bin/.gitkeep
+!src/.gitkeep
+!pkg/.gitkeep
