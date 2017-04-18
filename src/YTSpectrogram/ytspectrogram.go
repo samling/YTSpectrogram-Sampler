@@ -1,6 +1,7 @@
 package main
 
 import "github.com/mdlayher/waveform"
+import "encoding/json"
 import "io"
 import "math"
 import "os"
@@ -56,6 +57,10 @@ func main() {
 
 	for t, f := range values {
 		adjusted := Round((f*1E6), .5, 0) / float64(max)
-		fmt.Printf("%d,%.2f,%d\n", t, adjusted, int(resolution))
+		//fmt.Printf("%d,%.2f,%d\n", t, adjusted, int(resolution))
+		sampleSlice := []float64{float64(t), adjusted}
+		sampleJson, _ := json.Marshal(sampleSlice)
+
+		fmt.Println(string(sampleJson))
 	}
 }
