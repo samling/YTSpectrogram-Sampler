@@ -39,12 +39,13 @@ func main() {
 	defer r.Close()
 
 	max := 0
+	resolution := uint(4)
 
 	values, err := GetSampleValues(r,
 		nil,
 		nil,
-		waveform.Resolution(2),
-		waveform.Scale(1, 1),
+		waveform.Resolution(resolution),
+		nil,
 		waveform.ScaleClipping(),
 		waveform.Sharpness(1),
 	)
@@ -53,9 +54,8 @@ func main() {
 		max = int(math.Max(float64(max), Round((f*1E6), .5, 0)))
 	}
 
-	for _, f := range values {
-		adjusted := Round(Round((f*1E6), .5, 0)/float64(max), .5, 2)
-		fmt.Printf("%.2f\n", adjusted)
+	for t, f := range values {
+		adjusted := Round((f*1E6), .5, 0) / float64(max)
+		fmt.Printf("%d,%.2f,%d\n", t, adjusted, int(resolution))
 	}
-	fmt.Printf("The max is %d\n", max)
 }
