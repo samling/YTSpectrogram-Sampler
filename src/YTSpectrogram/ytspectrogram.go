@@ -98,7 +98,7 @@ func main() {
 
 	// Write hash and sampledata to db, ignore duplicates
 	tx := db.MustBegin()
-	tx.MustExec("INSERT INTO samples (hash, sampledata) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=hash", hash, jsonData)
+	tx.MustExec("INSERT INTO Sample (Hash, SampleData) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=hash", hash, jsonData)
 	tx.Commit()
 
 	// Print the map
