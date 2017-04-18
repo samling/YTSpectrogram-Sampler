@@ -47,11 +47,11 @@ func GetConnectionString(dbHost string, dbUser string, dbPass string, dbName str
 func main() {
 	// Protect against path traversal via injection
 	// TODO: Resolve conflicts with URLs that have "_" in them
-	//hash := sanitize.Path(os.Args[1])
-	hash := os.Args[1]
+	//id := sanitize.Path(os.Args[1])
+	id := os.Args[1]
 
 	// Open an IO Reader for our FLAC file
-	r, err := os.Open("./audio/" + hash + ".flac")
+	r, err := os.Open("./audio/" + id + ".flac")
 	if err != nil {
 		panic(err)
 	}
@@ -96,9 +96,9 @@ func main() {
 	connString := GetConnectionString(os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
 	db := sqlx.MustConnect("mysql", connString)
 
-	// Write hash and sampledata to db, ignore duplicates
+	// Write id and sampledata to db, ignore duplicates
 	tx := db.MustBegin()
-	tx.MustExec("INSERT INTO Sample (Hash, SampleData) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=hash", hash, jsonData)
+	tx.MustExec("INSERT INTO Sample (Id, SampleData) VALUES (?, ?) ON DUPLICATE KEY UPDATE Id=Id", id, jsonData)
 	tx.Commit()
 
 	// Print the map
