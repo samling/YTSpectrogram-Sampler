@@ -1,16 +1,15 @@
 package main
 
 import (
-	_ "database/sql"
+	"bytes"
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/jmoiron/sqlx"
-	_ "github.com/kennygrant/sanitize"
 	"github.com/mdlayher/waveform"
 	"io"
+	"io/ioutil"
 	"log"
 	"math"
+	"net/http"
 	"os"
 )
 
@@ -73,8 +72,9 @@ func main() {
 
 	// Initialize some variables
 	var (
-		max  = 0
-		data Data
+		max    = 0
+		data   Data
+		apiUrl = "http://sboynton.com:3000/api/Samples"
 	)
 
 	// Get sample data with our default values
@@ -110,15 +110,19 @@ func main() {
 		log.Fatal("Cannot encode to JSON: ", err)
 	}
 
-	// Connect to our database
-	//connString := GetConnectionString(os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
-	//db := sqlx.MustConnect("mysql", connString)
+	// Write our JSON data to a byte array for POSTing
+	jsonStr := []byte(jsonData)
 
-	//// Write id and sampledata to db, ignore duplicates
-	//tx := db.MustBegin()
-	//tx.MustExec("INSERT INTO Sample (Id, SampleData) VALUES (?, ?) ON DUPLICATE KEY UPDATE Id=Id", id, jsonData)
-	//tx.Commit()
+	// POST our data to our API endpoint
+	client := http.Client{}
+	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
 
-	// Print the map
-	fmt.Println(string(jsonData))
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Unable to reach the server.")
+	} else {
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println(string(body))
+	}
 }
