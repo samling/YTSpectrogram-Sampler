@@ -122,7 +122,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Unable to reach the server.")
 	} else {
-		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(body))
+		_, _ = ioutil.ReadAll(resp.Body)
+		//fmt.Println(string(body))
 	}
 }
