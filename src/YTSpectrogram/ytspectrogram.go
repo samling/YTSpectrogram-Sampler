@@ -61,7 +61,7 @@ func GetConnectionString(dbHost string, dbUser string, dbPass string, dbName str
 
 func main() {
 	// Get the ID of our video from the docker run argument
-	id := os.Args[1]
+	id := os.Getenv("YTS_ID")
 
 	// Open an IO Reader for our FLAC file
 	r, err := os.Open("./audio/" + id + ".flac")
