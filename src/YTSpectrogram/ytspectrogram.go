@@ -15,12 +15,13 @@ import (
 )
 
 type Data struct {
-	Samples []Sample
+	Id         string
+	SampleData []Sample
 }
 
 type Sample struct {
-	Timestamp  int
-	SampleData float64
+	Timestamp int
+	Value     float64
 }
 
 // Piggybacking off the waveform library to retrieve just the sample values instead of an image
@@ -91,10 +92,13 @@ func main() {
 		max = int(math.Max(float64(max), Round((val*1E6), .5, 0)))
 	}
 
+	// Build a data struct for our audio
+	data.Id = id
+
 	// Adjust our values to be percentages of the max and add them to our data struct
 	for time, val := range sampleValues {
 		adjustedVal := Round((val*1E6), .5, 0) / float64(max)
-		data.Samples = append(data.Samples, Sample{time, adjustedVal})
+		data.SampleData = append(data.SampleData, Sample{time, adjustedVal})
 	}
 
 	// TODO: Average our values to smooth out any blips and outliers
