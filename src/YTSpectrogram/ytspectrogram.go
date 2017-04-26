@@ -74,7 +74,6 @@ func main() {
 	var (
 		max  = 0
 		data Data
-		//apiUrl = "http://sboynton.com:3001/api/Samples"
 	)
 
 	// Get sample data with our default values
