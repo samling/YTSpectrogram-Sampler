@@ -27,12 +27,12 @@ type Sample struct {
 func GetSampleValues(r io.Reader, options ...waveform.OptionsFunc) ([]float64, error) {
 	w, err := waveform.New(r, options...)
 	if err != nil {
-		log.Fatal("Unable to generate waveform data: ", err)
+		log.Println("Unable to generate waveform data: ", err)
 	}
 
 	values, err := w.Compute()
 	if err != nil {
-		log.Fatal("Unable to compute sample data: ", err)
+		log.Println("Unable to compute sample data: ", err)
 	}
 
 	return values, nil
@@ -74,7 +74,7 @@ func main() {
 	var (
 		max    = 0
 		data   Data
-		apiUrl = "http://sboynton.com:3000/api/Samples"
+		apiUrl = "http://sboynton.com:3001/api/Samples"
 	)
 
 	// Get sample data with our default values
@@ -107,7 +107,7 @@ func main() {
 	// Serialize our map as a JSON dict
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		log.Fatal("Cannot encode to JSON: ", err)
+		log.Println("Cannot encode to JSON: ", err)
 	}
 
 	// Write our JSON data to a byte array for POSTing
@@ -120,9 +120,9 @@ func main() {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Unable to reach the server.")
+		log.Println("Unable to reach the server.")
 	} else {
-		_, _ = ioutil.ReadAll(resp.Body)
-		//fmt.Println(string(body))
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println(string(body))
 	}
 }
